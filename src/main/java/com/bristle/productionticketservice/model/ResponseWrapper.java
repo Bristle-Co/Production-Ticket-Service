@@ -1,11 +1,15 @@
 package com.bristle.productionticketservice.model;
 
+import java.time.LocalDateTime;
+
 public class ResponseWrapper<T> {
     // This is implemented because I want the api response to have same structure
     // regardless of successful request or not
     // also reserved for future in case any information should be added to the response json structure
 
     String path;
+
+    LocalDateTime timeStamp;
     int status;
     String message;
     T data;
@@ -13,14 +17,9 @@ public class ResponseWrapper<T> {
     public ResponseWrapper() {
     }
 
-    public ResponseWrapper(String path, int status, String message) {
+    public ResponseWrapper(String path, LocalDateTime timeStamp, int status, String message, T data) {
         this.path = path;
-        this.status = status;
-        this.message = message;
-    }
-
-    public ResponseWrapper(String path, int status, String message, T data) {
-        this.path = path;
+        this.timeStamp = timeStamp;
         this.status = status;
         this.message = message;
         this.data = data;
@@ -58,5 +57,22 @@ public class ResponseWrapper<T> {
         this.data = data;
     }
 
+    public LocalDateTime getTimeStamp() {
+        return timeStamp;
+    }
 
+    public void setTimeStamp(LocalDateTime timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
+    @Override
+    public String toString() {
+        return "ResponseWrapper{" +
+                "path='" + path + '\'' +
+                ", timeStamp=" + timeStamp +
+                ", status=" + status +
+                ", message='" + message + '\'' +
+                ", data=" + data +
+                '}';
+    }
 }
