@@ -1,8 +1,10 @@
 package com.bristle.productionticketservice.repository;
 
 import com.bristle.productionticketservice.model.ProductionTicketEntity;
+import com.bristle.proto.production_ticket.ProductionTicket;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 

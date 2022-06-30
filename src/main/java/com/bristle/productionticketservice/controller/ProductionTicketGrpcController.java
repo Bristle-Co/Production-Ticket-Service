@@ -38,7 +38,7 @@ public class ProductionTicketGrpcController extends ProductionTicketServiceGrpc.
     @Override
     public void upsertProductionTicket(UpsertProductionTicketRequest request, StreamObserver<UpsertProductionTicketResponse> responseObserver) {
         String requestId = request.getRequestContext().getRequestId();
-        log.info("Request id: " + requestId + " , upsertOrder grpc request received: " + request.getProductionTicket());
+        log.info("Request id: " + requestId + " , upsertProductionTicket grpc request received: \n" + request.getProductionTicket());
         ResponseContext.Builder responseContextBuilder = ResponseContext.newBuilder();
         responseContextBuilder.setRequestId(requestId);
         ProductionTicket toBeUpserted = request.getProductionTicket();
@@ -64,6 +64,27 @@ public class ProductionTicketGrpcController extends ProductionTicketServiceGrpc.
 
     @Override
     public void deleteProductionTicket(DeleteProductionTicketRequest request, StreamObserver<DeleteProductionTicketResponse> responseObserver) {
-        super.deleteProductionTicket(request, responseObserver);
+        String requestId = request.getRequestContext().getRequestId();
+        log.info("Request id: " + requestId + " , deleteProductionTicket grpc request received: ticketId:" + request.getProductionTicketId());
+        ResponseContext.Builder responseContextBuilder = ResponseContext.newBuilder();
+        responseContextBuilder.setRequestId(requestId);
+
+        try {
+            ProductionTicket deletedTicket = m_productionTicketService.deleteProductionTicket(request.getProductionTicketId());
+            responseObserver.onNext(
+                    DeleteProductionTicketResponse.newBuilder()
+                            .setProductionTicket(deletedTicket)
+                            .setResponseContext(responseContextBuilder).build());
+
+        } catch (Exception e) {
+            log.error("Request id: " + requestId + " deleteProductionTicket failed, error message: " + e.getMessage());
+            responseContextBuilder.setError(ApiError.newBuilder()
+                    .setErrorMessage(e.getMessage())
+                    .setExceptionName(e.getClass().getName()));
+
+            responseObserver.onNext(DeleteProductionTicketResponse.newBuilder()
+                    .setResponseContext(responseContextBuilder).build());
+        }
+        responseObserver.onCompleted();
     }
 }

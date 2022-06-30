@@ -22,19 +22,25 @@ public class ProductionTicketService {
 
     @Autowired
     public ProductionTicketService(ProductionTicketRepository m_productionTicketRepository
-    ,ProductionTicketEntityConverter converter) {
+            , ProductionTicketEntityConverter converter) {
         this.m_productionTicketRepository = m_productionTicketRepository;
         this.m_productTicketConverter = converter;
     }
 
     @Transactional
-    public ProductionTicket upsertProductionTicket(ProductionTicket ticket) throws Exception{
+    public ProductionTicket upsertProductionTicket(ProductionTicket ticket) throws Exception {
         ProductionTicketEntity ticketEntity = m_productTicketConverter.protoToEntity(ticket);
         m_productionTicketRepository.save(ticketEntity);
         ProductionTicketEntity stored = m_productionTicketRepository.findProductionTicketEntityByTicketId(ticketEntity.getTicketId());
         return m_productTicketConverter.entityToProto(stored);
     }
 
+    @Transactional
+    public ProductionTicket deleteProductionTicket(Integer ticketId) throws Exception {
+        ProductionTicketEntity deletedTicket = m_productionTicketRepository.findProductionTicketEntityByTicketId(ticketId);
+        m_productionTicketRepository.delete(deletedTicket);
+        return m_productTicketConverter.entityToProto(deletedTicket);
+    }
 
 
 }
