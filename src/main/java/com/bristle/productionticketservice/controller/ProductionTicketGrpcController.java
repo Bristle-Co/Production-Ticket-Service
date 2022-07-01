@@ -8,6 +8,7 @@ import com.bristle.proto.production_ticket.DeleteProductionTicketResponse;
 import com.bristle.proto.production_ticket.GetProductionTicketsRequest;
 import com.bristle.proto.production_ticket.GetProductionTicketsResponse;
 import com.bristle.proto.production_ticket.ProductionTicket;
+import com.bristle.proto.production_ticket.ProductionTicketFilter;
 import com.bristle.proto.production_ticket.ProductionTicketServiceGrpc;
 import com.bristle.proto.production_ticket.UpsertProductionTicketRequest;
 import com.bristle.proto.production_ticket.UpsertProductionTicketResponse;
@@ -18,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @GrpcService
 public class ProductionTicketGrpcController extends ProductionTicketServiceGrpc.ProductionTicketServiceImplBase {
@@ -32,7 +35,30 @@ public class ProductionTicketGrpcController extends ProductionTicketServiceGrpc.
 
     @Override
     public void getProductionTickets(GetProductionTicketsRequest request, StreamObserver<GetProductionTicketsResponse> responseObserver) {
-        super.getProductionTickets(request, responseObserver);
+        String requestId = request.getRequestContext().getRequestId();
+        log.info("Request id: " + requestId + " , getProductionTickets grpc request received: " + request.getFilter());
+        ResponseContext.Builder responseContextBuilder = ResponseContext.newBuilder();
+        responseContextBuilder.setRequestId(requestId);
+        ProductionTicketFilter filter = request.getFilter();
+
+        try {
+            List<ProductionTicket> tickets = m_productionTicketService.getProductionTickets(filter);
+            responseObserver.onNext(
+                    GetProductionTicketsResponse.newBuilder()
+                            .addAllProductionTicket(tickets)
+                            .setResponseContext(responseContextBuilder).build());
+
+        } catch (Exception e) {
+            log.error("Request id: " + requestId + "getProductionTickets grpc request failed. error message: " + e.getMessage());
+            responseContextBuilder.setError(ApiError.newBuilder()
+                    .setErrorMessage(e.getMessage())
+                    .setExceptionName(e.getClass().getName()));
+
+            responseObserver.onNext(
+                    GetProductionTicketsResponse.newBuilder()
+                            .setResponseContext(responseContextBuilder).build());
+        }
+        responseObserver.onCompleted();
     }
 
     @Override
