@@ -98,9 +98,8 @@ public class ProductionTicketService {
                             filter.getIssuedAtTo(), 0, ZoneOffset.UTC)));
         }
 
-        // TODO modify paging
         Sort sort = Sort.by(Sort.Direction.DESC, "issuedAt");
-        Pageable paging = PageRequest.of(0, 20, sort);
+        Pageable paging = PageRequest.of(filter.getPageIndex(), filter.getPageSize(), sort);
 
         List<ProductionTicketEntity> rs = m_productionTicketRepository.findAll(Specification.where(spec), paging).toList();
         return rs.stream().map(m_productTicketConverter::entityToProto).collect(Collectors.toList());
