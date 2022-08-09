@@ -42,7 +42,7 @@ public class ProductionTicketGrpcController extends ProductionTicketServiceGrpc.
         ProductionTicketFilter filter = request.getFilter();
 
         try {
-            List<ProductionTicket> tickets = m_productionTicketService.getProductionTickets(filter);
+            List<ProductionTicket> tickets = m_productionTicketService.getProductionTickets(filter, request.getPageIndex(), request.getPageSize());
             responseObserver.onNext(
                     GetProductionTicketsResponse.newBuilder()
                             .addAllProductionTicket(tickets)

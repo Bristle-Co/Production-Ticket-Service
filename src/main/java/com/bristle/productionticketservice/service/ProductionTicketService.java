@@ -58,7 +58,7 @@ public class ProductionTicketService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductionTicket> getProductionTickets(ProductionTicketFilter filter) throws Exception {
+    public List<ProductionTicket> getProductionTickets(ProductionTicketFilter filter, Integer pageIndex, Integer pageSize) throws Exception {
         Specification<ProductionTicketEntity> spec = new Specification<ProductionTicketEntity>() {
             @Override
             public Predicate toPredicate(Root<ProductionTicketEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
@@ -85,12 +85,12 @@ public class ProductionTicketService {
             spec = spec.and(ProductionTicketEntitySpec.likeProductName(filter.getProductName()));
         }
 
-        if (filter.getDueDateFrom() != Long.MIN_VALUE && filter.getDueDateTo() != Long.MIN_VALUE) {
+        if (hasDueDateFromAndTo(filter)) {
             spec = spec.and(ProductionTicketEntitySpec.dueDateBetween(new Date(filter.getDueDateFrom()),
                     new Date(filter.getDueDateTo())));
         }
 
-        if (filter.getIssuedAtFrom() != Long.MIN_VALUE && filter.getIssuedAtTo() != Long.MIN_VALUE) {
+        if (hasIssuedAtFromAndTo(filter)) {
             spec = spec.and(ProductionTicketEntitySpec.issuedBetween(
                     LocalDateTime.ofEpochSecond(
                             filter.getIssuedAtFrom(), 0, ZoneOffset.UTC),
@@ -99,10 +99,18 @@ public class ProductionTicketService {
         }
 
         Sort sort = Sort.by(Sort.Direction.DESC, "issuedAt");
-        Pageable paging = PageRequest.of(filter.getPageIndex(), filter.getPageSize(), sort);
+        Pageable paging = PageRequest.of(pageIndex, pageSize, sort);
 
         List<ProductionTicketEntity> rs = m_productionTicketRepository.findAll(Specification.where(spec), paging).toList();
         return rs.stream().map(m_productTicketConverter::entityToProto).collect(Collectors.toList());
+    }
+
+    private boolean hasDueDateFromAndTo(ProductionTicketFilter filter) {
+        return filter.getDueDateFrom() != 0 && filter.getDueDateFrom() != Long.MIN_VALUE && filter.getDueDateTo() != 0 && filter.getDueDateTo() != Long.MIN_VALUE;
+    }
+
+    private boolean hasIssuedAtFromAndTo(ProductionTicketFilter filter) {
+        return filter.getIssuedAtFrom() != 0 && filter.getIssuedAtFrom() != Long.MIN_VALUE && filter.getIssuedAtTo() != 0 && filter.getIssuedAtTo() != Long.MIN_VALUE;
     }
 
 
