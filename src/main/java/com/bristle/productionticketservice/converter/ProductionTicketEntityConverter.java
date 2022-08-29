@@ -4,18 +4,25 @@ import com.bristle.productionticketservice.model.ProductionTicketEntity;
 import com.bristle.proto.production_ticket.ProductionTicket;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Component
 public class ProductionTicketEntityConverter {
 
     public ProductionTicketEntity protoToEntity(ProductionTicket proto) {
+
         return new ProductionTicketEntity(
                 proto.getTicketId() == Integer.MIN_VALUE ? null : proto.getTicketId(),
                 proto.getCustomerId().equals("") ? null : proto.getCustomerId(),
-                proto.getDueDate() == Long.MIN_VALUE ? null : new Date(proto.getDueDate()),
+                proto.getDueDate() == Long.MIN_VALUE ? null : Instant.ofEpochMilli(proto.getDueDate()*1000).atZone(ZoneId.of("UTC")).toLocalDate(),
                 proto.getProductName().equals("") ? null : proto.getProductName(),
                 proto.getBristleType().equals("") ? null : proto.getBristleType(),
                 proto.getModel().equals("") ? null : proto.getModel(),
@@ -47,7 +54,7 @@ public class ProductionTicketEntityConverter {
         return ProductionTicket.newBuilder()
                 .setTicketId(entity.getTicketId() == null ? Integer.MIN_VALUE : entity.getTicketId())
                 .setCustomerId(entity.getCustomerId() == null ? "" : entity.getCustomerId())
-                .setDueDate(entity.getDueDate()==null? Long.MIN_VALUE : entity.getDueDate().getTime())
+                .setDueDate(entity.getDueDate()==null? Long.MIN_VALUE : entity.getDueDate().atStartOfDay().toEpochSecond(ZoneOffset.UTC))
                 .setProductName(entity.getProductName()==null ? "" : entity.getProductName())
                 .setBristleType(entity.getBristleType() == null?"": entity.getBristleType())
                 .setModel(entity.getModel()==null?"":entity.getModel())

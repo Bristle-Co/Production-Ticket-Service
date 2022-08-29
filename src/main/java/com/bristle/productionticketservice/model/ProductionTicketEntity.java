@@ -8,8 +8,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity(name = "production_tickets")
 public class ProductionTicketEntity {
@@ -55,9 +55,8 @@ public class ProductionTicketEntity {
     private String customerId;
 
     @Column(name = DUE_DATE, nullable = true)
-    @Temporal(TemporalType.DATE)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date dueDate;
+    private LocalDate dueDate;
 
     @Column(name = PRODUCT_NAME, nullable = true)
     private String productName;
@@ -137,7 +136,7 @@ public class ProductionTicketEntity {
 
     public ProductionTicketEntity() {}
 
-    public ProductionTicketEntity(Integer ticketId, String customerId, Date dueDate, String productName, String bristleType, String model, String innerTubeType, Float bristleDiameter, Integer quantity, String alumTubeType, String alumRimType, String modelNote, String productionNote1, String productionNote2, String productionNote3, String productionNote4, String productionNote5, String productionNote6, LocalDateTime donePreparingAt, String preparedBy, LocalDateTime doneTwiningAt, String twinedBy, LocalDateTime doneTrimmingAt, String trimmedBy, LocalDateTime donePackagingAt, String packagedBy, LocalDateTime issuedAt) {
+    public ProductionTicketEntity(Integer ticketId, String customerId, LocalDate dueDate, String productName, String bristleType, String model, String innerTubeType, Float bristleDiameter, Integer quantity, String alumTubeType, String alumRimType, String modelNote, String productionNote1, String productionNote2, String productionNote3, String productionNote4, String productionNote5, String productionNote6, LocalDateTime donePreparingAt, String preparedBy, LocalDateTime doneTwiningAt, String twinedBy, LocalDateTime doneTrimmingAt, String trimmedBy, LocalDateTime donePackagingAt, String packagedBy, LocalDateTime issuedAt) {
         this.ticketId = ticketId;
         this.customerId = customerId;
         this.dueDate = dueDate;
@@ -183,11 +182,11 @@ public class ProductionTicketEntity {
         this.customerId = customerId;
     }
 
-    public Date getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 
