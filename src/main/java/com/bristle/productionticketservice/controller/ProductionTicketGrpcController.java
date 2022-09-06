@@ -50,6 +50,7 @@ public class ProductionTicketGrpcController extends ProductionTicketServiceGrpc.
 
         } catch (Exception e) {
             log.error("Request id: " + requestId + "getProductionTickets grpc request failed. error message: " + e.getMessage());
+            e.printStackTrace();
             responseContextBuilder.setError(ApiError.newBuilder()
                     .setErrorMessage(e.getMessage())
                     .setExceptionName(e.getClass().getName()));
@@ -78,6 +79,7 @@ public class ProductionTicketGrpcController extends ProductionTicketServiceGrpc.
 
         } catch (Exception e) {
             log.error("Request id: " + requestId + " upsertProductionTicket failed, error message: " + e.getMessage());
+            e.printStackTrace();
             responseContextBuilder.setError(ApiError.newBuilder()
                     .setErrorMessage(e.getMessage())
                     .setExceptionName(e.getClass().getName()));
@@ -104,6 +106,7 @@ public class ProductionTicketGrpcController extends ProductionTicketServiceGrpc.
 
         } catch (Exception e) {
             log.error("Request id: " + requestId + " deleteProductionTicket failed, error message: " + e.getMessage());
+            e.printStackTrace();
             responseContextBuilder.setError(ApiError.newBuilder()
                     .setErrorMessage(e.getMessage())
                     .setExceptionName(e.getClass().getName()));

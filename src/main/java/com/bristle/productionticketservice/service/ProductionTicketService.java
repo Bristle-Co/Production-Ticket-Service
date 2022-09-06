@@ -4,6 +4,7 @@ import com.bristle.productionticketservice.converter.ProductionTicketEntityConve
 import com.bristle.productionticketservice.model.ProductionTicketEntity;
 import com.bristle.productionticketservice.repository.ProductionTicketEntitySpec;
 import com.bristle.productionticketservice.repository.ProductionTicketRepository;
+import com.bristle.proto.order.ProductEntry;
 import com.bristle.proto.production_ticket.ProductionTicket;
 import com.bristle.proto.production_ticket.ProductionTicketFilter;
 import org.slf4j.Logger;
@@ -33,21 +34,44 @@ public class ProductionTicketService {
     private final ProductionTicketRepository m_productionTicketRepository;
 
     private final ProductionTicketEntityConverter m_productTicketConverter;
+
+    private final OrderService m_orderService;
+
     Logger log = LoggerFactory.getLogger(ProductionTicketService.class);
 
-    @Autowired
-    public ProductionTicketService(ProductionTicketRepository m_productionTicketRepository
-            , ProductionTicketEntityConverter converter) {
+    public ProductionTicketService(ProductionTicketRepository m_productionTicketRepository,
+                                   ProductionTicketEntityConverter m_productTicketConverter,
+                                   OrderService m_orderService) {
         this.m_productionTicketRepository = m_productionTicketRepository;
-        this.m_productTicketConverter = converter;
+        this.m_productTicketConverter = m_productTicketConverter;
+        this.m_orderService = m_orderService;
     }
 
     @Transactional
     public ProductionTicket upsertProductionTicket(ProductionTicket ticket) throws Exception {
         ProductionTicketEntity ticketEntity = m_productTicketConverter.protoToEntity(ticket);
-        m_productionTicketRepository.save(ticketEntity);
-        ProductionTicketEntity stored = m_productionTicketRepository.findProductionTicketEntityByTicketId(ticketEntity.getTicketId());
-        return m_productTicketConverter.entityToProto(stored);
+
+        if (ticketEntity.getTicketId() == null) {
+            // this means that we're creating a productionTicket
+            m_productionTicketRepository.save(ticketEntity);
+            ProductionTicketEntity stored = m_productionTicketRepository.findProductionTicketEntityByTicketId(ticketEntity.getTicketId());
+            m_orderService.patchProductionTicketInfo(stored.getProductEntryId(),
+                    stored.getTicketId(),false);
+            return m_productTicketConverter.entityToProto(stored);
+
+        } else {
+            Optional<ProductionTicketEntity> existingProductTicket =
+                    m_productionTicketRepository.findById(ticketEntity.getTicketId());
+            m_orderService.patchProductionTicketInfo(existingProductTicket.get().getProductEntryId(),
+                    null,
+                    true);
+            m_orderService.patchProductionTicketInfo(ticketEntity.getProductEntryId(),
+                    ticketEntity.getTicketId(),false);
+            m_productionTicketRepository.save(ticketEntity);
+            ProductionTicketEntity stored = m_productionTicketRepository.findProductionTicketEntityByTicketId(ticketEntity.getTicketId());
+            return m_productTicketConverter.entityToProto(stored);
+        }
+
     }
 
     @Transactional
